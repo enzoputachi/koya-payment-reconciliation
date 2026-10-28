@@ -9,13 +9,32 @@ let total = 0;
 let count = 0;
 
 const lines = fs.readFileSync("payments.jsonl", "utf8").split("\n").filter((l) => l.length > 0);
+
+const latest = new Map()
 for (const line of lines) {
-  const event = JSON.parse(line);
-  if (event.status === "success") {
+  let event;
+  try {
+    event = JSON.parse(line);
+  } catch (error) {
+    continue;
+  }
+
+  if (!event || !event.txn_id) continue;
+
+  // c
+  const prev = latest.get(event.txn_id);
+  if (!prev || new Date(event.ts) >= new Date(prev.ts)) {
+    latest.set(event.txn_id, event)
+  }
+  
+}
+
+ for (const event of latest.values()) {
+   if (event.status === "success") {
     total += Number(event.amount);
     count += 1;
   }
-}
+ }
 
 const expected = parseInt(fs.readFileSync("expected.txt", "utf8").trim(), 10);
 
