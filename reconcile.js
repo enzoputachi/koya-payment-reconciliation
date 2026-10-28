@@ -21,7 +21,7 @@ for (const line of lines) {
 
   if (!event || !event.txn_id) continue;
 
-  // c
+  // store latest payment event 
   const prev = latest.get(event.txn_id);
   if (!prev || new Date(event.ts) >= new Date(prev.ts)) {
     latest.set(event.txn_id, event)
@@ -31,7 +31,7 @@ for (const line of lines) {
 
  for (const event of latest.values()) {
    if (event.status === "success") {
-    total += Number(event.amount);
+    total += Number(String(event.amount).replace(/./g, ""));
     count += 1;
   }
  }
